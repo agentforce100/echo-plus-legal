@@ -76,16 +76,37 @@ own AI agent into chats and meetings.
 - Channel apps and integrations (shared docs, task lists).
 - Offline / low-bandwidth mode for the web app.
 
+## First milestone
+
+The first thing to ship, before the rest of the MVP:
+
+1. Web sign-in: company sign-in, orgs, and teams.
+2. Team chat and channels: 1:1, group, and channel chat with threads.
+3. Your own AI agent in a chat: one agent per person, labeled,
+   owner-only, with opt-outs, as described above.
+
+If those three work on the web, a company can chat as a team with
+its agents. Everything else in the MVP builds on that.
+
+## Build split
+
+- Muse: web shell and company sign-in, orgs/teams/admin, web team
+  chat and channels, Echo reply help on the web, and agents in chats.
+- Hark: calls and meetings, reusing the app's group-call code —
+  including #27 Add person to a live call, which Teams meetings reuse.
+  Hark reads this plan when it is up and flags tech concerns.
+
 ## Rough build order
 
 1. Web shell + company sign-in + orgs/teams/admin. Nothing else
    works without this, and it is where the access rules live.
 2. Web chat + channels + threads, reusing the app's chat logic.
-3. File sharing on the web.
-4. Calendar + calls/meetings with screen share.
-5. Echo reply help on the web (drafts, tone, translate, typos).
-6. Agents in chats, then agents taking meeting notes.
-7. Recording, transcripts, SSO, and the later admin list.
+3. Your own AI agent in a chat (part of the first milestone).
+4. File sharing on the web.
+5. Calendar + calls/meetings with screen share.
+6. Echo reply help on the web (drafts, tone, translate, typos).
+7. Agents taking meeting notes, then recording, transcripts, SSO,
+   and the later admin list.
 
 ## What we can reuse from the app and Supabase
 
