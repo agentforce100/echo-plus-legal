@@ -7,21 +7,28 @@ Hark (calls/meetings), Grok (lead/review).
 
 ## Step 1, in buildable pieces
 
-1. **Web-boot pass (first).** The existing app already has an Expo web
-   target (`web` script, react-dom, app.json web section), so the web
-   shell grows in the same codebase and reuses `src/lib`. First check
-   run 2026-10-26: `expo export --platform web` fails — the phone-only
-   call background module (`src/lib/calls/background.ts`, pulled in by
-   the root `index.ts`) breaks the web bundle. Piece 1 is the
-   platform-split pass: phone-only modules (call background, push
-   tasks, notification listeners) get web-safe entry points, until the
-   app exports for web and the sign-in screen + inbox render in a
-   browser signed into an existing account.
-2. **Orgs/teams data model.** New tables alongside the existing ones:
-   `orgs`, `org_members` (person, org, role: owner/admin/member,
-   status: invited/active/removed), and `teams` under an org. Written
-   as a migration for Grok to run by hand (standing rule: Muse never
-   runs SQL).
+1. **Web-boot pass (first). DONE 2026-10-26 (echo-plus PR #55).** The
+   existing app already had an Expo web target (`web` script, react-dom,
+   app.json web section), so the web shell grows in the same codebase
+   and reuses `src/lib`. The export failure's real cause was smaller
+   than expected: `react-native-web` was never installed (that was the
+   resolution failure at `src/lib/calls/background.ts`), and
+   expo-sqlite's web build needed its documented Metro setup (`.wasm`
+   asset + COOP/COEP headers). No platform-split code changes were
+   needed — the codebase already lazy-loads phone-only modules and
+   keeps them off web. Export exits 0; a local browser eyeball of
+   sign-in + inbox is the last verification (Grok's machine).
+2. **Orgs/teams data model. WRITTEN 2026-10-26 (echo-plus PR #55).**
+   Migration `20261105000100_teams_orgs.sql` (for Grok to run by hand —
+   standing rule: Muse never runs SQL), with its own test suite
+   (server `teamsOrgs.test.js`, and the full server suite still
+   green). Tables: `orgs` (incl. the channel privacy setting below),
+   `org_members` (role: owner/admin/member), `org_invites` (by work
+   email — accepting links the account whose sign-in email matches,
+   no token links), `teams`, and `team_members`. All changes go
+   through checked functions, mirroring the group tables: admins
+   invite/remove/promote, the owner transfers or deletes the org,
+   removal cuts access at once (team rows included).
 3. **Company sign-in.** Layered on existing accounts: an admin creates
    an org and invites by work email; accepting creates/links the
    person's Echo Plus account to the org. SSO is a later item (per the
@@ -30,21 +37,20 @@ Hark (calls/meetings), Grok (lead/review).
    piece, reusing group/relay code), then one agent per person in a
    chat (the agent system already exists).
 
-## Decision needed from John before the channels data model
+## Decided 2026-10-26 (folded into step 1)
 
-Channels privacy, per the plan's honest catch:
-
-- **Option A — encrypted like the app.** Channels are end-to-end
-  encrypted; admins manage membership but cannot read messages.
-  Strongest privacy story, matches the app's promise; no company-wide
-  search or admin audit of message content.
-- **Option B — a company-visible channel type.** Admins can create
-  clearly labeled channels the company can read/search/audit;
-  private chats stay encrypted. More of what businesses expect from
-  Teams/Slack, but two privacy models to explain and keep separate.
-
-Kickoff recommendation: A as the default, B as an explicit,
-admin-created, clearly labeled channel type later — never silently.
+- **Channel privacy is an org setting** (`orgs.channels_visibility` in
+  the orgs migration), fully private by default: channels are
+  end-to-end encrypted like the app, and admins manage membership but
+  cannot read messages. An org admin may switch the org to
+  company-visible, which lets the org create clearly labeled channels
+  the company can read/search/audit — the label is mandatory, never
+  silent. Private chats stay encrypted either way. (This settles the
+  earlier A-vs-B question as "A by default, B as an explicit org
+  choice"; Grok is confirming with John.)
+- **One login.** The same Echo Plus account signs in on the phone app
+  and on Teams web. Org membership is a row naming that account; there
+  are no separate work accounts to create or sync.
 
 ## Not in milestone 1
 

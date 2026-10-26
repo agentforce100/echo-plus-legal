@@ -130,9 +130,16 @@ Two honest catches, to decide before building, not after:
   model as-is. The plan needs an explicit choice per feature:
   keep it end-to-end encrypted, or make it a clearly labeled
   company-visible feature (e.g. a channel an admin can read).
+  *Decided 2026-10-26: channel privacy is an org setting — fully
+  private (end-to-end encrypted) by default; an org admin may switch
+  the org to company-visible, and any company-readable channel is
+  clearly labeled. See docs/teams-kickoff.md.*
 - Web sign-in and company accounts are new: the app signs in by
   username, so company sign-in, SSO, and guest handling are new
-  work, not a reuse.
+  work, not a reuse. *Decided 2026-10-26: one login — the same Echo
+  Plus account is used on the phone app and Teams web; company
+  sign-in adds org membership and email invites on top of the
+  existing account, not a second account.*
 
 ## Rough costs
 
